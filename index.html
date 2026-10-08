@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Phone Prompt · Realistic</title>
+  <style>
+    /* ----- RESET & GLOBAL ----- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #0f1117;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* ----- PHONE HARDWARE FRAME ----- */
+    .phone-hardware {
+      max-width: 400px;
+      width: 100%;
+      background: #1c1e26;
+      border-radius: 52px;
+      padding: 12px;
+      box-shadow:
+        0 0 0 2px #2e3240,
+        0 0 0 6px #0a0c10,
+        0 25px 50px -12px rgba(0, 0, 0, 0.9),
+        inset 0 0 0 1px #4a4f62;
+    }
+
+    .phone-screen {
+      background: #f2f4f8;
+      border-radius: 42px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 660px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ----- DYNAMIC ISLAND / NOTCH (realistic) ----- */
+    .dynamic-island {
+      background: #0b0d12;
+      width: 120px;
+      height: 32px;
+      border-radius: 20px;
+      margin: 8px auto 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 8px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 10;
+    }
+
+    .island-sensor {
+      width: 6px;
+      height: 6px;
+      background: #1e2230;
+      border-radius: 50%;
+      box-shadow: inset 0 1px 3px black;
+    }
+
+    .island-camera {
+      width: 12px;
+      height: 12px;
+      background: #0a0c10;
+      border-radius: 50%;
+      border: 1px solid #2a2e3a;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .island-camera::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 4px;
+      height: 4px;
+      background: #1e2230;
+      border-radius: 50%;
+      box-shadow: 0 0 2px #4a90e2;
+    }
+
+    /* ----- STATUS BAR (iOS style) ----- */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 22px 6px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1c1e26;
+      letter-spacing: 0.2px;
+      background: transparent;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time {
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 0.3px;
+    }
+
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .battery-container {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .battery-outline {
+      width: 24px;
+      height: 12px;
+      border: 1.5px solid #1c1e26;
+      border-radius: 4px;
+      padding: 1px;
+      position: relative;
+    }
+
+    .battery-outline::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #1c1e26;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .battery-level-fill {
+      height: 100%;
+      width: 78%;
+      background: #1c1e26;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .signal-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.5px;
+      height: 12px;
+    }
+
+    .signal-bar {
+      width: 3px;
+      background: #1c1e26;
+      border-radius: 1px;
+    }
+
+    .signal-bar:nth-child(1) { height: 5px; }
+    .signal-bar:nth-child(2) { height: 8px; }
+    .signal-bar:nth-child(3) { height: 11px; }
+    .signal-bar:nth-child(4) { height: 14px; }
+
+    /* ----- APP HEADER ----- */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px 14px 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .app-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(145deg, #1e2b4a, #121a2e);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      color: white;
+    }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 19px;
+      color: #0a0c10;
+      letter-spacing: -0.3px;
+    }
+
+    .app-title span {
+      display: block;
+      font-weight: 400;
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: -1px;
+      letter-spacing: 0.2px;
+    }
+
+    /* ----- MAIN CONTENT (scrollable area) ----- */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 18px 12px 18px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+
+    /* ----- PROMPT CARD (realistic iOS card) ----- */
+    .prompt-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px 20px 20px 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+    }
+
+    .prompt-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+
+    .prompt-question {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: #0a0c10;
+      margin-bottom: 20px;
+      word-break: break-word;
+      letter-spacing: -0.2px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #4b5563;
+      letter-spacing: 0.2px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1.5px solid #e2e8f0;
+      background: #fafcff;
+      font-size: 16px;
+      font-family: inherit;
+      color: #0a0c10;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .input-field:focus {
+      border-color: #1e2b4a;
+      box-shadow: 0 0 0 4px rgba(30, 43, 74, 0.1);
+      background: #ffffff;
+    }
+
+    .input-field::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    /* ----- BUTTONS (realistic iOS style) ----- */
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px 12px;
+      border-radius: 40px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: -0.2px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      -webkit-appearance: none;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: #1e2b4a;
+      color: white;
+      box-shadow: 0 4px 12px rgba(30, 43, 74, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #25355c;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #1e2b4a;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* ----- BACKEND RESPONSE PANEL (realistic log style) ----- */
+    .response-panel {
+      background: #0f172a;
+      border-radius: 20px;
+      padding: 16px 18px;
+      margin-top: 4px;
+      color: #e2e8f0;
+      font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      word-break: break-word;
+      transition: all 0.2s;
+    }
+
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .response-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #94a3b8;
+    }
+
+    .method-badge {
+      background: #1e293b;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #60a5fa;
+      letter-spacing: 0.3px;
+    }
+
+    .status-badge {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: #064e3b;
+      color: #34d399;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .status-badge.error {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    .status-badge.pending {
+      background: #78350f;
+      color: #fbbf24;
+    }
+
+    .response-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .response-line {
+      display: flex;
+      gap: 8px;
+    }
+
+    .response-line .key {
+      color: #64748b;
+      min-width: 65px;
+      flex-shrink: 0;
+    }
+
+    .response-line .value {
+      color: #e2e8f0;
+      word-break: break-word;
+      font-weight: 400;
+    }
+
+    .value.success {
+      color: #34d399;
+    }
+
+    .value.muted {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .timestamp {
+      color: #475569;
+      font-size: 11px;
+      margin-top: 6px;
+      text-align: right;
+      letter-spacing: 0.2px;
+    }
+
+    /* ----- FOOTER (home indicator) ----- */
+    .home-indicator {
+      width: 134px;
+      height: 5px;
+      background: #1c1e26;
+      border-radius: 100px;
+      margin: 12px auto 8px auto;
+      opacity: 0.4;
+    }
+
+    /* ----- UTILITY ----- */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* ----- RESPONSIVE TWEAKS ----- */
+    @media (max-width: 420px) {
+      .phone-hardware {
+        border-radius: 40px;
+        padding: 8px;
+      }
+      .phone-screen {
+        border-radius: 32px;
+        min-height: 580px;
+      }
+      .dynamic-island {
+        width: 100px;
+        height: 28px;
+        margin-top: 6px;
+      }
+      .prompt-question {
+        font-size: 18px;
+      }
+      .btn {
+        padding: 14px 10px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PHONE HARDWARE FRAME -->
+  <div class="phone-hardware">
+    <div class="phone-screen">
+
+      <!-- DYNAMIC ISLAND (notch) -->
+      <div class="dynamic-island">
+        <div class="island-sensor"></div>
+        <div class="island-camera"></div>
+      </div>
+
+      <!-- STATUS BAR -->
+      <div class="status-bar">
+        <div class="status-left">
+          <span class="time" id="liveTime">9:41</span>
+        </div>
+        <div class="status-right">
+          <div class="signal-bars">
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+            <div class="signal-bar"></div>
+          </div>
+          <span style="font-size: 12px; font-weight: 600;">5G</span>
+          <div class="battery-container">
+            <div class="battery-outline">
+              <div class="battery-level-fill" id="batteryFill" style="width: 82%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APP HEADER -->
+      <div class="app-header">
+        <div class="app-icon">💬</div>
+        <div class="app-title">
+          Prompt<span>phone · v2.4</span>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="content">
+
+        <!-- PROMPT CARD -->
+        <div class="prompt-card">
+          <div class="prompt-label">current prompt</div>
+          <div class="prompt-question" id="promptQuestion">
+            What's your favorite way to relax?
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="userInput">Your response</label>
+            <input 
+              type="text" 
+              id="userInput" 
+              class="input-field" 
+              placeholder="Type your answer..." 
+              autocomplete="off" 
+              autocorrect="off" 
+              autocapitalize="sentences"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-primary" id="submitBtn">
+              <span>↵</span> Send
+            </button>
+            <button class="btn btn-secondary" id="nextBtn">
+              <span>↻</span> Next
+            </button>
+          </div>
+        </div>
+
+        <!-- BACKEND RESPONSE PANEL (realistic log) -->
+        <div class="response-panel" id="responsePanel">
+          <div class="response-header">
+            <div class="response-header-left">
+              <span>📡</span>
+              <span>api /v1/prompt</span>
+              <span class="method-badge">POST</span>
+            </div>
+            <span class="status-badge" id="httpStatusBadge">200 OK</span>
+          </div>
+          <div class="response-body" id="responseBody">
+            <div class="response-line">
+              <span class="key">status:</span>
+              <span class="value success">ready</span>
+            </div>
+            <div class="response-line">
+              <span class="key">message:</span>
+              <span class="value" id="responseMessage">Waiting for your input.</span>
+            </div>
+            <div class="response-line">
+              <span class="key">request:</span>
+              <span class="value muted" id="requestInfo">—</span>
+            </div>
+          </div>
+          <div class="timestamp" id="timestamp">just now</div>
+        </div>
+
+      </div>
+
+      <!-- HOME INDICATOR -->
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ============================================================
+      //  REALISTIC PHONE PROMPT — FRONTEND + SIMULATED BACKEND
+      //  Backend logic: processes prompts, validates input,
+      //  returns structured JSON-like responses with status codes.
+      // ============================================================
+
+      // ----- BACKEND PROMPT DATABASE (server-side "storage") -----
+      const PROMPT_DB = [
+        {
+          id: 'p-101',
+          text: "What's your favorite way to relax?",
+          category: 'wellness',
+          followUp: "How often do you get to do it?"
+        },
+        {
+          id: 'p-102',
+          text: "Describe your perfect meal in three words.",
+          category: 'food',
+          followUp: "What's the first word?"
+        },
+        {
+          id: 'p-103',
+          text: "If you could travel anywhere right now, where would you go?",
+          category: 'travel',
+          followUp: "Why that place?"
+        },
+        {
+          id: 'p-104',
+          text: "What's a song that always puts you in a good mood?",
+          category: 'music',
+          followUp: "What genre is it?"
+        },
+        {
+          id: 'p-105',
+          text: "What's the best piece of advice you've ever received?",
+          category: 'wisdom',
+          followUp: "Who gave it to you?"
+        },
+        {
+          id: 'p-106',
+          text: "What small thing made you smile today?",
+          category: 'gratitude',
+          followUp: "Tell me more."
+        },
+        {
+          id: 'p-107',
+          text: "If you had a superpower, what would it be and why?",
+          category: 'imagination',
+          followUp: "Any downside?"
+        },
+        {
+          id: 'p-108',
+          text: "What's your go-to comfort movie or TV show?",
+          category: 'entertainment',
+          followUp: "How many times have you seen it?"
+        },
+        {
+          id: 'p-109',
+          text: "What's something you're looking forward to?",
+          category: 'future',
+          followUp: "When will it happen?"
+        },
+        {
+          id: 'p-110',
+          text: "Coffee or tea? And how do you take it?",
+          category: 'daily',
+          followUp: "Any favorite brand?"
+        }
+      ];
+
+      // ----- BACKEND STATE -----
+      let currentPromptIndex = 0;
+      let requestCounter = 0;
+      let lastRequestPayload = null;
+
+      // ----- DOM REFERENCES -----
+      const promptQuestionEl = document.getElementById('promptQuestion');
+      const userInputEl = document.getElementById('userInput');
+      const submitBtn = document.getElementById('submitBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const httpStatusBadge = document.getElementById('httpStatusBadge');
+      const responseMessageEl = document.getElementById('responseMessage');
+      const requestInfoEl = document.getElementById('requestInfo');
+      const timestampEl = document.getElementById('timestamp');
+      const liveTimeEl = document.getElementById('liveTime');
+      const batteryFill = document.getElementById('batteryFill');
+
+      // ============================================================
+      //  BACKEND SIMULATION (runs in browser but mimics real API)
+      // ============================================================
+
+      /**
+       * Simulates a backend POST /v1/prompt endpoint.
+       * Accepts { promptId, promptText, answer } and returns
+       * a structured response with status code, message, and metadata.
+       */
+      function backendProcessRequest(payload) {
+        const { promptId, promptText, answer } = payload;
+        const trimmedAnswer = (answer || '').trim();
+        const now = new Date();
+        const requestId = `req_${Math.random().toString(36).substring(2, 10)}`;
+
+        // Increment request counter
+        requestCounter++;
+
+        // ----- VALIDATION (backend) -----
+        if (!promptId || !promptText) {
+          return {
+            httpStatus: 400,
+            statusText: '400 Bad Request',
+            error: true,
+            requestId,
+            timestamp: now.toISOString(),
+            body: {
+              status: 'error',
+              code: 'INVALID_PROMPT',
+              message: 'Prompt ID or text missing.',
+              answer: trimmedAnswer
+            }
+          };
+        }
+
+        if (trimmedAnswer.length === 0) {
+          return {
+            httpStatus: 422,
+            statusText: '422 Unprocessable',
+            error: true,
+            requestId,
+            timestamp: now.toISOString(),
+            body: {
+              status: 'error',
+              code: 'EMPTY_ANSWER',
+              message: 'Answer cannot be empty. Please type something.',
+              answer: ''
+            }
+          };
+        }
+
+        if (trimmedAnswer.length > 500) {
+          return {
+            httpStatus: 413,
+            statusText: '413 Too Large',
+            error: true,
+            requestId,
+            timestamp: now.toISOString(),
+            body: {
+              status: 'error',
+              code: 'ANSWER_TOO_LONG',
+              message: 'Answer exceeds 500 characters.',
+              answer: trimmedAnswer.substring(0, 50) + '...'
+            }
+          };
+        }
+
+        // ----- SUCCESS: process answer (backend logic) -----
+        const lowerAnswer = trimmedAnswer.toLowerCase();
+        let backendReply = '';
+
+        // Smart-ish response generation based on keywords
+        if (lowerAnswer.includes('coffee') || lowerAnswer.includes('tea')) {
+          backendReply = `Beverage detected: "${trimmedAnswer}". Good choice.`;
+        } else if (lowerAnswer.includes('relax') || lowerAnswer.includes('chill') || lowerAnswer.includes('calm')) {
+          backendReply = `Relaxation noted. "${trimmedAnswer}" sounds peaceful.`;
+        } else if (lowerAnswer.includes('travel') || lowerAnswer.includes('visit') || lowerAnswer.includes('go to')) {
+          backendReply = `Travel plans: "${trimmedAnswer}". Sounds exciting!`;
+        } else if (lowerAnswer.length < 8) {
+          backendReply = `Short answer recorded: "${trimmedAnswer}". Thanks for sharing.`;
+        } else {
+          // Generic but personalized
+          const genericReplies = [
+            `Received: "${trimmedAnswer}". Backend processed successfully.`,
+            `Thanks for your answer: "${trimmedAnswer}".`,
+            `"${trimmedAnswer}" — noted. Have a great day!`,
+            `Input recorded: "${trimmedAnswer}". Request #${requestCounter}.`
+          ];
+          backendReply = genericReplies[Math.floor(Math.random() * genericReplies.length)];
+        }
+
+        // Add request ID for realism
+        backendReply += ` [${requestId}]`;
+
+        return {
+          httpStatus: 200,
+          statusText: '200 OK',
+          error: false,
+          requestId,
+          timestamp: now.toISOString(),
+          body: {
+            status: 'success',
+            code: 'PROCESSED',
+            message: backendReply,
+            promptId,
+            answer: trimmedAnswer,
+            requestNumber: requestCounter
+          }
+        };
+      }
+
+      // ============================================================
+      //  FRONTEND LOGIC
+      // ============================================================
+
+      /**
+       * Load a prompt by index (simulates GET /v1/prompt/:id)
+       */
+      function loadPrompt(index) {
+        // Circular navigation
+        if (index >= PROMPT_DB.length) index = 0;
+        if (index < 0) index = PROMPT_DB.length - 1;
+        currentPromptIndex = index;
+
+        const prompt = PROMPT_DB[currentPromptIndex];
+        promptQuestionEl.textContent = prompt.text;
+
+        // Reset input and UI
+        userInputEl.value = '';
+        userInputEl.focus();
+
+        // Update response panel to "ready" state
+        updateResponsePanel({
+          httpStatus: 200,
+          statusText: '200 OK',
+          error: false,
+          body: {
+            status: 'ready',
+            message: `Prompt loaded: "${prompt.text.substring(0, 40)}${prompt.text.length > 40 ? '…' : ''}"`,
+            requestNumber: null
+          }
+        }, null);
+
+        // Update request info line
+        requestInfoEl.textContent = `prompt_id: ${prompt.id} · category: ${prompt.category}`;
+        requestInfoEl.className = 'value muted';
+
+        // Reset timestamp
+        timestampEl.textContent = 'just now';
+      }
+
+      /**
+       * Update the response panel UI with backend response data.
+       */
+      function updateResponsePanel(backendResponse, payload) {
+        const { httpStatus, statusText, error, body } = backendResponse;
+
+        // Update status badge
+        httpStatusBadge.textContent = statusText;
+        if (error) {
+          httpStatusBadge.className = 'status-badge error';
+        } else {
+          httpStatusBadge.className = 'status-badge';
+        }
+
+        // Update message
+        responseMessageEl.textContent = body.message || 'No message.';
+        responseMessageEl.className = error ? 'value' : 'value success';
+
+        // Update request info if payload provided
+        if (payload) {
+          const { promptId, answer } = payload;
+          requestInfoEl.textContent = `prompt_id: ${promptId} · answer_length: ${(answer || '').length}`;
+          requestInfoEl.className = 'value';
+        }
+
+        // Update timestamp
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        timestampEl.textContent = `last request: ${timeStr}`;
+      }
+
+      /**
+       * Handle submit — simulates frontend calling backend API.
+       */
+      function handleSubmit() {
+        const prompt = PROMPT_DB[currentPromptIndex];
+        const answer = userInputEl.value;
+
+        // Build request payload (as frontend would send)
+        const payload = {
+          promptId: prompt.id,
+          promptText: prompt.text,
+          answer: answer
+        };
+
+        // Store last payload for debugging
+        lastRequestPayload = payload;
+
+        // Show pending state briefly (realistic)
+        httpStatusBadge.textContent = 'pending...';
+        httpStatusBadge.className = 'status-badge pending';
+        responseMessageEl.textContent = 'Sending request to backend...';
+        responseMessageEl.className = 'value muted';
+
+        // Simulate network latency (80–180ms)
+        setTimeout(() => {
+          // Call simulated backend
+          const backendResponse = backendProcessRequest(payload);
+
+          // Update UI with response
+          updateResponsePanel(backendResponse, payload);
+
+          // If success, clear input and keep focus
+          if (!backendResponse.error) {
+            userInputEl.value = '';
+            userInputEl.focus();
+          } else {
+            // On error, keep the text for correction
+            userInputEl.focus();
+          }
+        }, 80 + Math.random() * 100);
+      }
+
+      /**
+       * Handle next prompt — cycles to next in DB.
+       */
+      function handleNext() {
+        const nextIndex = (currentPromptIndex + 1) % PROMPT_DB.length;
+        loadPrompt(nextIndex);
+
+        // Brief "loading" effect
+        httpStatusBadge.textContent = '200 OK';
+        httpStatusBadge.className = 'status-badge';
+        responseMessageEl.textContent = 'Ready for next answer.';
+        responseMessageEl.className = 'value success';
+      }
+
+      // ============================================================
+      //  INITIALIZATION & EVENT LISTENERS
+      // ============================================================
+
+      // Load first prompt on startup
+      loadPrompt(0);
+
+      // Update clock every second (realistic)
+      function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        liveTimeEl.textContent = `${hours}:${minutes} ${ampm}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // Battery drain simulation (very slow, realistic)
+      let batteryLevel = 82;
+      setInterval(() => {
+        if (batteryLevel > 15) {
+          batteryLevel -= 0.3;
+          batteryFill.style.width = batteryLevel + '%';
+        }
+      }, 15000);
+
+      // Button events
+      submitBtn.addEventListener('click', handleSubmit);
+      nextBtn.addEventListener('click', handleNext);
+
+      // Enter key submits
+      userInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSubmit();
+        }
+      });
+
+      // Optional: expose backend for debugging in console
+      window.__phonePromptBackend = {
+        prompts: PROMPT_DB,
+        getCurrentIndex: () => currentPromptIndex,
+        process: backendProcessRequest,
+        loadPrompt: loadPrompt
+      };
+
+      // Focus input on load (mobile-friendly)
+      setTimeout(() => userInputEl.focus(), 300);
+
+    })();
+  </script>
+</body>
+</html>
